@@ -1,4 +1,4 @@
-#!/bin/env sh
+#!/bin/sh
 set -e
 
 # 1. Dynamically locate the script's active directory location

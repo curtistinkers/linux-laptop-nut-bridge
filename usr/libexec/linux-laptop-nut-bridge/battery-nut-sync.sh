@@ -1,4 +1,4 @@
-#!/bin/env sh
+#!/bin/sh
 
 # Dynamically locate whichever battery and AC folder exists on the host machine
 BAT_DIR=$(find /sys/class/power_supply/ -maxdepth 1 -name "BAT*" -o -name "BATT*" | head -n 1)
