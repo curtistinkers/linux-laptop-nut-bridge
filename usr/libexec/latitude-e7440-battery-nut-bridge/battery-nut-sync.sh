@@ -1,6 +1,9 @@
-#!/bin/sh
+#!/bin/env sh
 
-BAT_DIR="/sys/class/power_supply/BAT0"
+# Dynamically locate whichever battery and AC folder exists on the host machine
+BAT_DIR=$(find /sys/class/power_supply/ -maxdepth 1 -name "BAT*" -o -name "BATT*" | head -n 1)
+AC_DIR=$(find /sys/class/power_supply/ -maxdepth 1 -name "AC*" -o -name "ADP*" -o -name "ACAD*" | head -n 1)
+
 RUN_DIR="/run/battery-nut-bridge"
 STATUS_FILE="$RUN_DIR/internal-battery-sync.status"
 
@@ -8,16 +11,16 @@ STATUS_FILE="$RUN_DIR/internal-battery-sync.status"
 touch "$STATUS_FILE"
 
 # 2. Cache permanent hardware metadata variables right at startup
-MFR=$(cat "$BAT_DIR/manufacturer" 2>/dev/null | xargs || echo "Dell")
-MODEL=$(cat "$BAT_DIR/model_name" 2>/dev/null | xargs || echo "Latitude_E7440")
+MFR=$(cat "$BAT_DIR/manufacturer" 2>/dev/null | xargs || echo "Generic")
+MODEL=$(cat "$BAT_DIR/model_name" 2>/dev/null | xargs || echo "Battery")
 SERIAL=$(cat "$BAT_DIR/serial_number" 2>/dev/null | xargs || echo "Unknown")
-TECH=$(cat "$BAT_DIR/technology" 2>/dev/null | xargs || echo "Li-ion")
+TECH=$(cat "$BAT_DIR/technology" 2>/dev/null | xargs || echo "Unknown")
 
-echo "Initializing Full Telemetry NUT Sync Handler. Serial: $SERIAL"
+echo "Initializing Universal Battery-to-NUT Sync Handler. Serial: $SERIAL"
 
 update_nut_status() {
     # Core States
-    LINE_STATUS=$(cat /sys/class/power_supply/AC/online 2>/dev/null || echo "1")
+    LINE_STATUS=$(cat "$AC_DIR/online" 2>/dev/null || echo "1")
     CHARGE_PCT=$(cat "$BAT_DIR/capacity" 2>/dev/null || echo "100")
     BAT_STATUS=$(cat "$BAT_DIR/status" 2>/dev/null || echo "Unknown")
 
