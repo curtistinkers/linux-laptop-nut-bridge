@@ -7,11 +7,11 @@ if [ "$1" = "configure" ]; then
         sed -i 's/^MODE=.*/MODE=standalone/g' /etc/nut/nut.conf
     fi
 
-    # 2. Append the internal-battery definition to ups.conf if it doesn't exist
-    if [ -f /etc/nut/ups.conf ] && ! grep -q "\[internal-battery\]" /etc/nut/ups.conf; then
+    # 2. Append the battery definition to ups.conf if it doesn't exist
+    if [ -f /etc/nut/ups.conf ] && ! grep -q "\[battery\]" /etc/nut/ups.conf; then
         cat << 'EOF' >> /etc/nut/ups.conf
 
-[internal-battery]
+[battery]
     driver = dummy-ups
     port = /run/battery-nut-bridge/internal-battery-sync.status
     desc = "Internal Laptop Battery Pseudo-UPS"
@@ -27,11 +27,13 @@ EOF
     /usr/libexec/latitude-e7440-battery-nut-bridge/battery-nut-sync.sh || true
 
     # 5. Enable and start the timer
-    systemctl enable --now battery-nut-bridge.timer || true
+    systemctl enable battery-nut-bridge.timer || true
+    systemctl start battery-nut-bridge.timer || true
 
     # 6. Update the driver list and start the server stack asynchronously
+    systemctl daemon-reload
     systemctl restart nut-driver-enumerator.service || true
-    systemctl enable nut-driver@internal-battery.service || true
-    systemctl start nut-driver@internal-battery.service || true
+    systemctl enable nut-driver@battery.service || true
+    systemctl start nut-driver@battery.service || true
     systemctl restart nut-server.service || true
 fi
