@@ -1,5 +1,5 @@
 Package: latitude-e7440-battery-nut-bridge
-Version: 1.0.0
+Version: dev
 Section: utils
 Priority: optional
 Architecture: all
