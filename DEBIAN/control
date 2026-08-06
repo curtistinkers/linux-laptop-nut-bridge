@@ -1,4 +1,4 @@
-Package: latitude-e7440-nut-ups
+Package: latitude-e7440-battery-nut-bridge
 Version: 1.0.0
 Section: utils
 Priority: optional
@@ -7,4 +7,4 @@ Maintainer: curtistinkers <curtistinkers.commit@gmail.com>
 Depends: coreutils, grep, awk, systemd, nut-server, nut-client
 Description: Virtual Network UPS Tools (NUT) bridge for Dell Latitude E7440.
  Automatically translates internal ACPI battery capacity and line states
- into a networked dummy-ups device for Proxmox cluster tracking.
+ into a dummy-ups device.
