@@ -1,11 +1,12 @@
-#!/bin/sh
+#!/bin/env sh
 set -e
 
 if [ "$1" = "remove" ] || [ "$1" = "purge" ]; then
-    # 1. Stop and disable your tracking service
+    # 1. Stop and disable the background timer and service definitions
+    systemctl disable --now battery-nut-bridge.timer || true
     systemctl disable --now battery-nut-bridge.service || true
 
-    # 2. Stop the virtual NUT driver instance
+    # 2. Stop the virtual NUT driver instance tracking your container
     systemctl disable --now nut-driver@internal-battery.service || true
 
     # 3. Cleanly remove the [internal-battery] block from ups.conf if present
@@ -14,10 +15,10 @@ if [ "$1" = "remove" ] || [ "$1" = "purge" ]; then
         sed -i '/\[internal-battery\]/,+3d' /etc/nut/ups.conf
     fi
 
-    # 4. Clean out the dynamic systemd instance override directory
+    # 4. Clean out the systemd instance directory and its generated checksums
     rm -rf /etc/systemd/system/nut-driver@internal-battery.service.d
 
-    # 5. Refresh systemd and restart the core NUT server to clear the state
+    # 5. Refresh systemd and restart the core NUT server to clear the network state
     systemctl daemon-reload
     systemctl restart nut-driver-enumerator.service || true
     systemctl restart nut-server.service || true
