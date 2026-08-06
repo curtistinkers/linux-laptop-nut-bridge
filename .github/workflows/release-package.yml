@@ -138,3 +138,10 @@ jobs:
             .release-staging/latitude-e7440-battery-nut-bridge_${{ steps.set_version.outputs.version }}.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Remove temporary release branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          RELEASE_BRANCH="release/${{ steps.set_version.outputs.version }}"
+          git push origin --delete "$RELEASE_BRANCH" || true
