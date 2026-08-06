@@ -1,74 +1,63 @@
-# Dell Latitude E7440 Internal Battery to NUT Bridge
+# Linux Laptop NUT Bridge
 
-A native integration framework designed for the **Dell Latitude E7440**. This package translates the laptop's internal battery management system data directly into a standardized Network UPS Tools (NUT) pseudo-device called `internal-battery`.
+A lightweight, sandboxed integration framework that exposes a Linux laptop's internal battery telemetry to Network UPS Tools (NUT). It dynamically scans and adapts to diverse laptop hardware layouts, translating ACPI metrics into a `[battery]` pseudo-UPS NUT device.
 
-By exposing live hardware capacity, voltage states, battery wear health metrics, and grid connection parameters to the local network stack, other servers, virtual machines, or network clients can monitor the host and execute graceful automated orchestrations when utility mains power is severed.
-
-## Features
-
-- **Zero-Dependency Core Logic**: Relies entirely on native, built-in GNU system shell infrastructure and core utilities (`sh`, `awk`, `grep`, `dd`).
-- **Real-Time Hardware Metrics**: Automatically maps, extracts, and normalizes low-level kernel micro-unit values (μAh, μV) into standard electrical floating points (Ah, V, A).
-- **Sandboxing**: Strict operational containment utilizing advanced `systemd` isolation policies.
-- **Dynamic Variable Reporting**: Exposes battery wear calculation matrices, factory serial numbers, nominal profiles, and active charging statuses.
-
-## Package Directory Architecture
+## Directory Structure
 
 ```text
-~/latitude-e7440-battery-nut-bridge/
+~/linux-laptop-nut-bridge/
 ├── DEBIAN/
-│   ├── control       # Package metadata
-│   ├── postinst      # Atomically patches configuration and configures systemd
-│   └── prerm         # Safely strips custom modifications on removal
+│   ├── control       # Package metadata and system dependencies
+│   ├── postinst      # Patches NUT config and schedules the systemd timer
+│   └── prerm         # Stops services and strips configurations on removal
 ├── lib/
 │   └── systemd
 │       └── system
-│           └── battery-nut-bridge.service   # Background hardware scraping loop
+│           ├── battery-nut-bridge.service  # Oneshot telemetry metrics scraper
+│           └── battery-nut-bridge.timer    # Core timer (runs every 2 seconds)
 └── usr/
     └── libexec
-        └── latitude-e7440-battery-nut-bridge
-            └── power-handler.sh    # Battery data tracking shell script
+        └── linux-laptop-nut-bridge
+            └── battery-nut-sync.sh        # Universal path parsing script
 ```
 
 ## System Dependencies
 
-When deployed via `apt`, the system configuration manager automatically ensures that the following pre-compiled distribution targets are active:
+Automatically pulled during installation:
 
-- `coreutils`
-- `grep`
-- `awk`
-- `systemd`
-- `nut-server` (Network UPS Tools - Monitoring Framework Daemon)
-- `nut-client` (Network UPS Tools - Querying Utilities)
+* `coreutils`, `grep`, `awk`, `systemd`
+* `nut-server`
+* `nut-client`
 
-## Security Profile & Sandboxing
+## Sandbox Isolation
 
-The `battery-nut-bridge.service` runs as a native background unit protected with strict security barriers. Even though it reads hardware telemetry nodes, it is isolated from mutating host processes:
+The `battery-nut-bridge.service` utilizes strict systemd security confinement:
 
-- `ProtectSystem=strict`: The entire server filesystem layout is hard-locked as read-only.
-- `ProtectHome=yes`, `ProtectKernelModules=yes`, `ProtectControlGroups=yes`: Blocks access to physical user homes, operational driver subsystems, and system tracking layers.
-- `NoNewPrivileges=yes`: Strict process containment that prevents the utility from calling elevation binaries or cracking authorization boundaries.
-- `RuntimeDirectory=battery-nut-bridge`: Restricts operational filesystem mutation explicitly to an ephemeral runtime cache folder located at `/run/battery-nut-bridge/`. Systemd manages the lifecycle of this folder automatically.
+* `ProtectSystem=strict` blocks total filesystem modification.
+* `NoNewPrivileges=yes` prevents process privilege elevation.
+* `RuntimeDirectory=linux-laptop-nut-bridge` confines all transient file operations strictly to an ephemeral, root-allocated memory space at `/run/linux-laptop-nut-bridge/`.
+* `RuntimeDirectoryPreserve=yes` ensures the tracked metrics remain in memory between the timer execution intervals.
 
-## Installation & Deployment
+## Build and Installation
 
-1. Compile the workspace structure cleanly on your host:
+1. Compile the workspace structure cleanly on your host machine:
 
    ```bash
-   dpkg-deb --build ~/latitude-e7440-battery-nut-bridge
+   dpkg-deb --build ~/linux-laptop-nut-bridge
    ```
 
 2. Deploy the generated configuration archive using `apt`:
 
    ```bash
-   sudo apt install ./latitude-e7440-battery-nut-bridge.deb
+   sudo apt install ./linux-laptop-nut-bridge.deb
    ```
 
-## Querying NUT Telemetry
+## Verifying NUT Telemetry
 
-Once installation completes, the background driver will automatically map to ibternal battery data. To review live metrics from the pseudo-UPS, use the standard NUT querying tool:
+Query the virtual device status across the network layer by running:
 
 ```bash
-upsc internal-battery
+upsc battery
 ```
 
 ### Output Example
@@ -84,28 +73,32 @@ battery.health: 98.6%
 battery.protection.high: 90
 battery.protection.low: 50
 battery.type: Li-poly
-battery.voltage: 8.46
+battery.voltage: 8.456
 battery.voltage.nominal: 7.4
 device.mfr: LGC-LGC3.6
 device.model: DELL CJW7D09
 device.serial: 46084
 device.type: ups
+driver.debug: 0
+driver.flag.allow_killpower: 0
+driver.name: dummy-ups
+driver.parameter.mode: dummy
+driver.parameter.pollinterval: 2
+driver.parameter.port: /run/linux-laptop-nut-bridge/internal-battery-sync.status
+driver.parameter.synchronous: auto
+driver.state: updateinfo
+driver.version: 2.8.1
+driver.version.internal: 0.18
 ups.mfr: LGC-LGC3.6
 ups.model: DELL CJW7D09
 ups.serial: 46084
 ups.status: OL
 ```
 
-### Telemetry Field Guide
+## Package Purge
 
-- `ups.status`: Reports current grid states (`OL` = Online/Utility Power, `OB` = On Battery/Mains Severed, `CHRG` = Actively Charging cell buffers, `LB` = Low Battery Warning under 15%).
-- `battery.health`: Calculates active cell wear tracking based on the mathematical ratio between current fully chargeable capacity and initial factory design parameters.
-- `battery.charge.now` / `full`: Normalized from raw hardware microampere-hours (μAh) into explicit standard Ampere-hours (Ah).
-
-## Package Removal
-
-To completely remove the NUT bridge, turn off background tasks, and completely clear the configuration parameters, run:
+To completely stop background tasks and cleanly strip out the custom configuration, execute:
 
 ```bash
-sudo apt purge latitude-e7440-battery-nut-bridge
+sudo apt purge linux-laptop-nut-bridge
 ```
