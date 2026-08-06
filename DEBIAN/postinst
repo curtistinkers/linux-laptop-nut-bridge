@@ -22,8 +22,8 @@ EOF
      systemctl daemon-reload
 
      # Now enable and start safely without triggering warning flags
-     systemctl enable power-handler.service || true
-     systemctl start power-handler.service || true
+     systemctl enable battery-nut-bridge.service || true
+     systemctl start battery-nut-bridge.service || true
 
      # Update the driver list and start the server stack asynchronously
      systemctl restart nut-driver-enumerator.service || true
