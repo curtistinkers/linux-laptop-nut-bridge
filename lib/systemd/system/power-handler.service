@@ -5,7 +5,7 @@ Before=nut-driver.target
 
 [Service]
 Type=simple
-ExecStart=/usr/libexec/latitude-e7440-nut-ups/power-handler.sh
+ExecStart=/usr/libexec/latitude-e7440-battery-nut-bridge/power-handler.sh
 Restart=always
 
 # Lock down the root filesystem, making it entirely read-only
