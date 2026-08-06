@@ -59,12 +59,9 @@ jobs:
           fi
 
           git push origin "$RELEASE_BRANCH" --force-with-lease
-          if git ls-remote --exit-code --tags origin "$TAG_NAME" >/dev/null 2>&1; then
-            echo "Remote tag $TAG_NAME already exists; skipping tag push"
-          else
-            git tag "$TAG_NAME"
-            git push origin "$TAG_NAME"
-          fi
+          git fetch origin --tags --force
+          git tag -f "$TAG_NAME"
+          git push origin "refs/tags/$TAG_NAME" --force
 
       - name: Create release package staging directory
         shell: bash
