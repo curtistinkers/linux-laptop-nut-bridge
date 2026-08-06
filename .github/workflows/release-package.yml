@@ -29,6 +29,8 @@ jobs:
 
       - name: Create release package staging directory
         shell: bash
+        env:
+          RELEASE_VERSION: ${{ steps.set_version.outputs.version }}
         run: |
           set -euo pipefail
           rm -rf .release-staging
@@ -41,15 +43,15 @@ jobs:
 
           path = Path('.release-staging/source/DEBIAN/control')
           text = path.read_text(encoding='utf-8')
-          text = re.sub(r'^(Version:\s*).+$', r'\g<1>' + os.environ['VERSION'], text, count=1, flags=re.MULTILINE)
+          text = re.sub(r'^(Version:\s*).+$', r'\g<1>' + os.environ['RELEASE_VERSION'], text, count=1, flags=re.MULTILINE)
           path.write_text(text, encoding='utf-8')
-          print(f'Updated staged control file to {os.environ["VERSION"]}')
+          print(f'Updated staged control file to {os.environ["RELEASE_VERSION"]}')
           PY
           cp -a .release-staging/source/DEBIAN .release-staging/package/
           cp -a .release-staging/source/lib .release-staging/package/
           cp -a .release-staging/source/usr .release-staging/package/
           find .release-staging/package -type f \( -name 'README.md' -o -name 'LICENSE' -o -name '.prompt.md' \) -delete
-          tar --exclude='.git' --exclude='.release-staging' -czf ".release-staging/latitude-e7440-battery-nut-bridge_${VERSION}.tar.gz" -C .release-staging/source .
+          tar --exclude='.git' --exclude='.release-staging' -czf ".release-staging/latitude-e7440-battery-nut-bridge_${RELEASE_VERSION}.tar.gz" -C .release-staging/source .
 
       - name: Build Debian package
         shell: bash
