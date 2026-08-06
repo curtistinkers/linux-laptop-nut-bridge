@@ -27,7 +27,7 @@ RestrictAddressFamilies=none
 ProtectClock=yes
 
 # Restrict /run directory access
-RuntimeDirectory=power-handler
+RuntimeDirectory=battery-nut-bridge
 
 [Install]
 WantedBy=multi-user.target

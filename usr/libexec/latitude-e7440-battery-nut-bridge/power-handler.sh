@@ -1,7 +1,7 @@
 #!/bin/sh
 
 BAT_DIR="/sys/class/power_supply/BAT0"
-RUN_DIR="/run/power-handler"
+RUN_DIR="/run/battery-nut-bridge"
 STATUS_FILE="$RUN_DIR/nut_pseudo_ups.status"
 
 # 1. Instantly generate a placeholder so the NUT daemon never encounters a missing file
