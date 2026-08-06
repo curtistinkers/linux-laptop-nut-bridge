@@ -21,10 +21,8 @@ EOF
     # 3. Force systemd to refresh its disk cache BEFORE touching any units
     systemctl daemon-reload
 
-    # 4. Force execute the script once manually to instantly establish the initial
-    # status file# This ensures the NUT driver doesn't encounter a missing file
-    # error on first launch
-    /usr/libexec/latitude-e7440-battery-nut-bridge/battery-nut-sync.sh || true
+    # 5. Run the oneshot service to initialize the /run directory and file
+    systemctl start battery-nut-bridge.service || true
 
     # 5. Enable and start the timer
     systemctl enable battery-nut-bridge.timer || true
