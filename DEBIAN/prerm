@@ -7,16 +7,19 @@ if [ "$1" = "remove" ] || [ "$1" = "purge" ]; then
     systemctl disable --now battery-nut-bridge.service || true
 
     # 2. Stop the virtual NUT driver instance tracking your container
-    systemctl disable --now nut-driver@internal-battery.service || true
+    systemctl disable --now nut-driver@battery.service || true
 
-    # 3. Cleanly remove the [internal-battery] block from ups.conf if present
+    # 3. Cleanly remove the [battery] block from ups.conf if present
     if [ -f /etc/nut/ups.conf ]; then
-        # This strips the [internal-battery] block and its 3 indented trailing lines
-        sed -i '/\[internal-battery\]/,+3d' /etc/nut/ups.conf
+        # This strips the [battery] block and its 3 indented trailing lines
+        sed -i '/\[battery\]/,+3d' /etc/nut/ups.conf
     fi
 
     # 4. Clean out the systemd instance directory and its generated checksums
-    rm -rf /etc/systemd/system/nut-driver@internal-battery.service.d
+    rm -rf /etc/systemd/system/nut-driver@battery.service.d
+
+    # 4. Clean out the run directory
+    rm -rf /run/battery-nut-bridge
 
     # 5. Refresh systemd and restart the core NUT server to clear the network state
     systemctl daemon-reload
