@@ -1,6 +1,6 @@
 [Unit]
 Description=AC/Battery Power to NUT Synchronizer (Oneshot Run)
-After=input.target nut-server.service
+After=input.target
 Before=nut-driver.target
 
 [Service]
