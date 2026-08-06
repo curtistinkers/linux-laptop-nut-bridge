@@ -3,7 +3,7 @@ set -e
 
 if [ "$1" = "remove" ] || [ "$1" = "purge" ]; then
     # 1. Stop and disable your tracking service
-    systemctl disable --now power-handler.service || true
+    systemctl disable --now battery-nut-bridge.service || true
 
     # 2. Stop the virtual NUT driver instance
     systemctl disable --now nut-driver@internal-battery.service || true
