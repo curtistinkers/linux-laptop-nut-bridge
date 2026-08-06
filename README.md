@@ -13,8 +13,8 @@ A lightweight, sandboxed integration framework that exposes a Linux laptop's int
 ├── lib/
 │   └── systemd
 │       └── system
-│           ├── battery-nut-bridge.service  # Oneshot telemetry metrics scraper
-│           └── battery-nut-bridge.timer    # Core timer (runs every 2 seconds)
+│           ├── linux-laptop-nut-bridge.service  # Oneshot telemetry metrics scraper
+│           └── linux-laptop-nut-bridge.timer    # Core timer (runs every 2 seconds)
 └── usr/
     └── libexec
         └── linux-laptop-nut-bridge
@@ -31,7 +31,7 @@ Automatically pulled during installation:
 
 ## Sandbox Isolation
 
-The `battery-nut-bridge.service` utilizes strict systemd security confinement:
+The `linux-laptop-nut-bridge.service` utilizes strict systemd security confinement:
 
 * `ProtectSystem=strict` blocks total filesystem modification.
 * `NoNewPrivileges=yes` prevents process privilege elevation.

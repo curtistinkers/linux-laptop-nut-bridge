@@ -1,6 +1,6 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Source: https://github.com/curtistinkers/latitude-e7440-battery-nut-bridge
-Upstream-Name: latitude-e7440-battery-nut-bridge
+Source: https://github.com/curtistinkers/linux-laptop-nut-bridge
+Upstream-Name: linux-laptop-nut-bridge
 Upstream-Contact: curtistinkers <curtistinkers.commit@gmail.com>
 
 Files: *

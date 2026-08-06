@@ -93,13 +93,13 @@ jobs:
         run: |
           set -euo pipefail
           cd .release-staging/package
-          dpkg-deb --build . ../latitude-e7440-battery-nut-bridge_${{ steps.set_version.outputs.version }}_all.deb
+          dpkg-deb --build . ../linux-laptop-nut-bridge_${{ steps.set_version.outputs.version }}_all.deb
 
       - name: Validate built package
         shell: bash
         run: |
           set -euo pipefail
-          ARTIFACT=".release-staging/latitude-e7440-battery-nut-bridge_${{ steps.set_version.outputs.version }}_all.deb"
+          ARTIFACT=".release-staging/linux-laptop-nut-bridge_${{ steps.set_version.outputs.version }}_all.deb"
           test -f "$ARTIFACT"
           dpkg-deb --info "$ARTIFACT" | sed -n '1,12p'
           echo "Validated package artifact: $ARTIFACT"
@@ -132,7 +132,7 @@ jobs:
       - name: Upload release artifacts
         uses: softprops/action-gh-release@v2
         with:
-          files: .release-staging/latitude-e7440-battery-nut-bridge_${{ steps.set_version.outputs.version }}_all.deb
+          files: .release-staging/linux-laptop-nut-bridge_${{ steps.set_version.outputs.version }}_all.deb
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
