@@ -25,12 +25,16 @@ jobs:
           set -euo pipefail
           TAG_NAME="${GITHUB_REF#refs/tags/}"
           VERSION="${TAG_NAME#v}"
-          export VERSION
+          DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
+          export VERSION DEFAULT_BRANCH
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Preparing release snapshot for version $VERSION"
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin "$DEFAULT_BRANCH"
+          git checkout -B "$DEFAULT_BRANCH" "origin/$DEFAULT_BRANCH"
 
           RELEASE_BRANCH="release/${VERSION}"
           python3 <<'PY'
@@ -52,13 +56,13 @@ jobs:
             echo "No version change needed"
           else
             git commit -m "Prepare release ${VERSION}"
-            git push origin "$RELEASE_BRANCH" --force-with-lease
           fi
 
-          git tag -f "$TAG_NAME"
+          git push origin "$RELEASE_BRANCH" --force-with-lease
           if git ls-remote --exit-code --tags origin "$TAG_NAME" >/dev/null 2>&1; then
             echo "Remote tag $TAG_NAME already exists; skipping tag push"
           else
+            git tag "$TAG_NAME"
             git push origin "$TAG_NAME"
           fi
 
@@ -103,6 +107,31 @@ jobs:
           test -f "$ARTIFACT"
           dpkg-deb --info "$ARTIFACT" | sed -n '1,12p'
           echo "Validated package artifact: $ARTIFACT"
+
+      - name: Restore default branch to dev
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
+          git checkout "$DEFAULT_BRANCH"
+          python3 <<'PY'
+          import re
+          from pathlib import Path
+
+          path = Path('DEBIAN/control')
+          text = path.read_text(encoding='utf-8')
+          updated = re.sub(r'^(Version:\s*).+$', r'\g<1>dev', text, count=1, flags=re.MULTILINE)
+          path.write_text(updated, encoding='utf-8')
+          print('Restored DEBIAN/control to dev version')
+          PY
+
+          git add DEBIAN/control
+          if git diff --cached --quiet; then
+            echo "Default branch already at dev version"
+          else
+            git commit -m "Restore dev version after release ${{ steps.set_version.outputs.version }}"
+            git push origin "$DEFAULT_BRANCH"
+          fi
 
       - name: Upload release artifacts
         uses: softprops/action-gh-release@v2
