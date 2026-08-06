@@ -27,6 +27,7 @@ ProtectClock=yes
 
 # Restrict /run directory access
 RuntimeDirectory=battery-nut-bridge
+RuntimeDirectoryPreserve=yes
 
 [Install]
 WantedBy=multi-user.target
