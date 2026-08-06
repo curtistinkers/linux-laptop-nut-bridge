@@ -15,8 +15,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Set package version from tag
+      - name: Prepare release version from tag
         id: set_version
         shell: bash
         run: |
@@ -25,7 +27,36 @@ jobs:
           VERSION="${TAG_NAME#v}"
           export VERSION
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Using release version: $VERSION"
+          echo "Preparing release snapshot for version $VERSION"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          RELEASE_BRANCH="release/${VERSION}"
+          python3 <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          version = os.environ['VERSION']
+          path = Path('DEBIAN/control')
+          text = path.read_text(encoding='utf-8')
+          updated = re.sub(r'^(Version:\s*).+$', rf'\g<1>{version}', text, count=1, flags=re.MULTILINE)
+          path.write_text(updated, encoding='utf-8')
+          print(f'Updated DEBIAN/control to version {version}')
+          PY
+
+          git checkout -B "$RELEASE_BRANCH"
+          git add DEBIAN/control
+          if git diff --cached --quiet; then
+            echo "No version change needed"
+          else
+            git commit -m "Prepare release ${VERSION}"
+            git push origin "$RELEASE_BRANCH" --force-with-lease
+          fi
+
+          git tag -f "$TAG_NAME"
+          git push origin "$TAG_NAME" --force-with-lease
 
       - name: Create release package staging directory
         shell: bash
