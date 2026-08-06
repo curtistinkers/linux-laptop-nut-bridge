@@ -2,7 +2,7 @@
 
 BAT_DIR="/sys/class/power_supply/BAT0"
 RUN_DIR="/run/battery-nut-bridge"
-STATUS_FILE="$RUN_DIR/nut_pseudo_ups.status"
+STATUS_FILE="$RUN_DIR/internal-battery-sync.status"
 
 # 1. Instantly generate a placeholder so the NUT daemon never encounters a missing file
 touch "$STATUS_FILE"
@@ -21,7 +21,7 @@ update_nut_status() {
     CHARGE_PCT=$(cat "$BAT_DIR/capacity" 2>/dev/null || echo "100")
     BAT_STATUS=$(cat "$BAT_DIR/status" 2>/dev/null || echo "Unknown")
 
-    # Raw Math Telemetry Values
+    # Raw Maths Telemetry Values
     V_RAW=$(cat "$BAT_DIR/voltage_now" 2>/dev/null || echo "0")
     V_NOM_RAW=$(cat "$BAT_DIR/voltage_min_design" 2>/dev/null || echo "0")
     I_RAW=$(cat "$BAT_DIR/current_now" 2>/dev/null || echo "0")
@@ -91,7 +91,4 @@ ups.serial: %s\n" \
     chmod 644 "$STATUS_FILE"
 }
 
-while true; do
-    update_nut_status
-    sleep 2
-done
+update_nut_status
