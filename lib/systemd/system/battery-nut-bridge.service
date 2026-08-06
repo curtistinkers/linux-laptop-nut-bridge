@@ -1,12 +1,11 @@
 [Unit]
-Description=AC/Battery Power to NUT Synchronizer
+Description=AC/Battery Power to NUT Synchronizer (Oneshot Run)
 After=input.target nut-server.service
 Before=nut-driver.target
 
 [Service]
-Type=simple
-ExecStart=/usr/libexec/latitude-e7440-battery-nut-bridge/power-handler.sh
-Restart=always
+Type=oneshot
+ExecStart=/usr/libexec/latitude-e7440-battery-nut-bridge/battery-nut-sync.sh
 
 # Lock down the root filesystem, making it entirely read-only
 ProtectSystem=strict

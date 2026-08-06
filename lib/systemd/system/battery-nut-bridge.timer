@@ -1,0 +1,10 @@
+[Unit]
+Description=Trigger AC/Battery Power to NUT Synchronizer Periodically
+
+[Timer]
+OnBootSec=1
+OnUnitActiveSec=2
+AccuracySec=1ms
+
+[Install]
+WantedBy=timers.target
