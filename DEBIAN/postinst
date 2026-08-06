@@ -1,0 +1,33 @@
+#!/bin/sh
+set -e
+
+if [ "$1" = "configure" ]; then
+    # 1. Update nut.conf to standalone mode if not already set
+    if [ -f /etc/nut/nut.conf ]; then
+        sed -i 's/^MODE=.*/MODE=standalone/g' /etc/nut/nut.conf
+    fi
+
+    # 2. Append the internal-battery definition to ups.conf if it does not exist
+    if [ -f /etc/nut/ups.conf ] && ! grep -q "\[internal-battery\]" /etc/nut/ups.conf; then
+        cat << 'EOF' >> /etc/nut/ups.conf
+
+[internal-battery]
+    driver = dummy-ups
+    port = /run/power-handler/nut_pseudo_ups.status
+    desc = "Internal Laptop Battery Pseudo-UPS"
+EOF
+    fi
+
+    # 3. Activate everything in the exact right order
+     systemctl daemon-reload
+
+     # Now enable and start safely without triggering warning flags
+     systemctl enable power-handler.service || true
+     systemctl start power-handler.service || true
+
+     # Update the driver list and start the server stack asynchronously
+     systemctl restart nut-driver-enumerator.service || true
+     systemctl enable nut-driver@internal-battery.service || true
+     systemctl start nut-driver@internal-battery.service || true
+     systemctl restart nut-server.service || true
+fi

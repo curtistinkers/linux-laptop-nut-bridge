@@ -1,0 +1,33 @@
+[Unit]
+Description=AC/Battery Power to NUT Synchronizer
+After=input.target nut-server.service
+Before=nut-driver.target
+
+[Service]
+Type=simple
+ExecStart=/usr/libexec/latitude-e7440-nut-ups/power-handler.sh
+Restart=always
+
+# Lock down the root filesystem, making it entirely read-only
+ProtectSystem=strict
+
+# Protect home directories and system logging configurations
+ProtectHome=yes
+ProtectControlGroups=yes
+ProtectKernelModules=yes
+
+# Create a completely isolated, private /tmp directory for this script
+PrivateTmp=yes
+
+# Prevent the script from acquiring new privileges or elevation paths
+NoNewPrivileges=yes
+
+# Deny access to networking tunnels and kernel clock tuning
+RestrictAddressFamilies=none
+ProtectClock=yes
+
+# Restrict /run directory access
+RuntimeDirectory=power-handler
+
+[Install]
+WantedBy=multi-user.target
