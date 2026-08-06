@@ -25,28 +25,31 @@ jobs:
           VERSION="${TAG_NAME#v}"
           export VERSION
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          python3 <<'PY'
-          import os
-          import re
-          from pathlib import Path
-
-          path = Path('DEBIAN/control')
-          text = path.read_text(encoding='utf-8')
-          text = re.sub(r'^(Version:\s*).+$', r'\g<1>' + os.environ['VERSION'], text, count=1, flags=re.MULTILINE)
-          path.write_text(text, encoding='utf-8')
-          print(f'Updated DEBIAN/control Version to {os.environ["VERSION"]}')
-          PY
+          echo "Using release version: $VERSION"
 
       - name: Create release package staging directory
         shell: bash
         run: |
           set -euo pipefail
           rm -rf .release-staging
-          mkdir -p .release-staging/package
-          cp -a DEBIAN .release-staging/package/
-          cp -a lib .release-staging/package/
-          cp -a usr .release-staging/package/
+          mkdir -p .release-staging/source .release-staging/package
+          tar --exclude='.git' --exclude='.release-staging' -cf - . | tar -xf - -C .release-staging/source
+          python3 <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          path = Path('.release-staging/source/DEBIAN/control')
+          text = path.read_text(encoding='utf-8')
+          text = re.sub(r'^(Version:\s*).+$', r'\g<1>' + os.environ['VERSION'], text, count=1, flags=re.MULTILINE)
+          path.write_text(text, encoding='utf-8')
+          print(f'Updated staged control file to {os.environ["VERSION"]}')
+          PY
+          cp -a .release-staging/source/DEBIAN .release-staging/package/
+          cp -a .release-staging/source/lib .release-staging/package/
+          cp -a .release-staging/source/usr .release-staging/package/
           find .release-staging/package -type f \( -name 'README.md' -o -name 'LICENSE' -o -name '.prompt.md' \) -delete
+          tar --exclude='.git' --exclude='.release-staging' -czf ".release-staging/latitude-e7440-battery-nut-bridge_${VERSION}.tar.gz" -C .release-staging/source .
 
       - name: Build Debian package
         shell: bash
@@ -64,9 +67,11 @@ jobs:
           dpkg-deb --info "$ARTIFACT" | sed -n '1,12p'
           echo "Validated package artifact: $ARTIFACT"
 
-      - name: Upload release artifact
+      - name: Upload release artifacts
         uses: softprops/action-gh-release@v2
         with:
-          files: .release-staging/latitude-e7440-battery-nut-bridge_${{ steps.set_version.outputs.version }}_all.deb
+          files: |
+            .release-staging/latitude-e7440-battery-nut-bridge_${{ steps.set_version.outputs.version }}_all.deb
+            .release-staging/latitude-e7440-battery-nut-bridge_${{ steps.set_version.outputs.version }}.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
