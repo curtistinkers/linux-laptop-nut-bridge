@@ -19,7 +19,7 @@ if [ "$1" = "remove" ] || [ "$1" = "purge" ]; then
     rm -rf /etc/systemd/system/nut-driver@battery.service.d
 
     # 4. Clean out the run directory
-    rm -rf /run/battery-nut-bridge
+    rm -rf /run/linux-laptop-nut-bridge
 
     # 5. Refresh systemd and restart the core NUT server to clear the network state
     systemctl daemon-reload

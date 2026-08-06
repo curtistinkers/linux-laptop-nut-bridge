@@ -5,7 +5,7 @@ Before=nut-driver.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/libexec/latitude-e7440-battery-nut-bridge/battery-nut-sync.sh
+ExecStart=/usr/libexec/linux-laptop-nut-bridge/battery-nut-sync.sh
 
 # Lock down the root filesystem, making it entirely read-only
 ProtectSystem=strict
@@ -26,7 +26,7 @@ RestrictAddressFamilies=none
 ProtectClock=yes
 
 # Restrict /run directory access
-RuntimeDirectory=battery-nut-bridge
+RuntimeDirectory=linux-laptop-nut-bridge
 RuntimeDirectoryPreserve=yes
 
 [Install]
