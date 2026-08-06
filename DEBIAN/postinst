@@ -22,11 +22,11 @@ EOF
     systemctl daemon-reload
 
     # 5. Run the oneshot service to initialize the /run directory and file
-    systemctl start battery-nut-bridge.service || true
+    systemctl start linux-laptop-nut-bridge.service || true
 
     # 5. Enable and start the timer
-    systemctl enable battery-nut-bridge.timer || true
-    systemctl start battery-nut-bridge.timer || true
+    systemctl enable linux-laptop-nut-bridge.timer || true
+    systemctl start linux-laptop-nut-bridge.timer || true
 
     # 6. Update the driver list and start the server stack asynchronously
     systemctl daemon-reload

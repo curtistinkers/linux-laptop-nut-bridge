@@ -3,8 +3,8 @@ set -e
 
 if [ "$1" = "remove" ] || [ "$1" = "purge" ]; then
     # 1. Stop and disable the background timer and service definitions
-    systemctl disable --now battery-nut-bridge.timer || true
-    systemctl disable --now battery-nut-bridge.service || true
+    systemctl disable --now linux-laptop-nut-bridge.timer || true
+    systemctl disable --now linux-laptop-nut-bridge.service || true
 
     # 2. Stop the virtual NUT driver instance tracking your container
     systemctl disable --now nut-driver@battery.service || true
