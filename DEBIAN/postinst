@@ -13,7 +13,7 @@ if [ "$1" = "configure" ]; then
 
 [internal-battery]
     driver = dummy-ups
-    port = /run/battery-nut-bridge/nut_pseudo_ups.status
+    port = /run/battery-nut-bridge/internal-batter-sync.status
     desc = "Internal Laptop Battery Pseudo-UPS"
 EOF
     fi
