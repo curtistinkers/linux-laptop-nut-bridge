@@ -14,15 +14,17 @@ restart_nut_server() {
     deb-systemd-invoke restart nut-server.service
 }
 
-case ${1} in
-    remove)
-        restart_nut_server
-        ;;
-    purge)
-        remove_config_files
-        restart_nut_server
-        ;;
-esac
+main() {
+    case "${1}" in
+        remove)
+            restart_nut_server
+            ;;
+        purge)
+            remove_config_files
+            restart_nut_server
+            ;;
+    esac
+}
 
 # Pass all incoming command line execution arguments into the main controller
 main "$@"

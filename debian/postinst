@@ -35,7 +35,6 @@ enable_nut_bridge() {
     systemctl daemon-reload
     deb-systemd-invoke restart nut-driver-enumerator.service >/dev/null || true
     deb-systemd-invoke start nut-driver@battery.service >/dev/null || true
-    deb-systemd-helper enable nut-driver@battery.service >/dev/null || true
     deb-systemd-invoke restart nut-server.service >/dev/null || true
 fi
 }
