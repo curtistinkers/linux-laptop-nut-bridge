@@ -15,15 +15,17 @@ disable_battery_bridge() {
     deb-systemd-helper disable nut-driver@battery.service
 }
 
-case ${1} in
-    remove)
-        disable_battery_bridge
-        ;;
-    purge)
-        disable_battery_bridge
-        remove_battery_config
-        ;;
-esac
+main() {
+    case "${1}" in
+        remove)
+            disable_battery_bridge
+            ;;
+        purge)
+            disable_battery_bridge
+            remove_battery_config
+            ;;
+    esac
+}
 
 # Pass all incoming command line execution arguments into the main controller
 main "$@"
