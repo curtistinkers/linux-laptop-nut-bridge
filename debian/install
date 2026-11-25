@@ -1,0 +1,2 @@
+usr/lib/systemd/system/*                usr/lib/systemd/system
+usr/libexec/linux-laptop-nut-bridge/*   usr/libexec/linux-laptop-nut-bridge

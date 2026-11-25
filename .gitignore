@@ -1,0 +1,5 @@
+debian/.debhelper/
+debian/linux-laptop-nut-bridge/
+debian/debhelper-build-stamp
+debian/files
+debian/linux-laptop-nut-bridge.*

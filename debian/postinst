@@ -1,0 +1,61 @@
+#!/bin/sh
+set -eu
+
+update_nut_config_file() {
+    # 1. Update nut.conf to standalone mode if not already set
+    if [ -f /etc/nut/nut.conf ]; then
+        sed -i 's/^MODE=.*/MODE=standalone/g' /etc/nut/nut.conf
+    fi
+
+    # 2. Append the battery definition to ups.conf if it doesn't exist
+    if [ -f /etc/nut/ups.conf ] && ! grep -q "\[battery\]" /etc/nut/ups.conf; then
+        cat << 'EOF' >> /etc/nut/ups.conf
+
+[battery]
+    driver = dummy-ups
+    port = /run/linux-laptop-nut-bridge/internal_battery_status
+    desc = "Internal Laptop Battery Pseudo-UPS"
+EOF
+    fi
+}
+
+enable_nut_bridge() {
+    if [ -d /run/systemd/system ]; then
+        # 3. Force systemd to refresh its disk cache BEFORE touching any units
+    systemctl daemon-reload
+
+    # 5. Run the oneshot service to initialize the /run directory and file
+    deb-systemd-invoke start linux-laptop-nut-bridge.service >/dev/null || true
+
+    # 5. Enable and start the timer
+    deb-systemd-helper enable linux-laptop-nut-bridge.timer >/dev/null || true
+    deb-systemd-invoke start linux-laptop-nut-bridge.timer >/dev/null || true
+
+    # 6. Update the driver list and start the server stack asynchronously
+    systemctl daemon-reload
+    deb-systemd-invoke restart nut-driver-enumerator.service >/dev/null || true
+    deb-systemd-invoke start nut-driver@battery.service >/dev/null || true
+    deb-systemd-helper enable nut-driver@battery.service >/dev/null || true
+    deb-systemd-invoke restart nut-server.service >/dev/null || true
+fi
+}
+
+main() {
+    case "${1}" in
+        configure)
+            update_nut_config_file
+            enable_nut_bridge
+            ;;
+        upgrade)
+            enable_nut_bridge
+            ;;
+    esac
+}
+
+# Pass all incoming command line execution arguments into the main controller
+main "$@"
+
+# DEBHELPER macro placeholder required for downstream package additions
+#DEBHELPER#
+
+exit 0

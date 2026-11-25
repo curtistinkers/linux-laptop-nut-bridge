@@ -1,0 +1,33 @@
+#!/bin/sh
+set -eu
+
+remove_config_files() {
+    rm -rf /etc/systemd/system/nut-driver@battery.service.d
+
+    rm -rf /etc/systemd/system/linux-laptop-nut-bridge.service.d
+    rm -rf /run/linux-laptop-nut-bridge
+}
+
+restart_nut_server() {
+    systemctl daemon-reload
+    deb-systemd-invoke restart nut-driver-enumerator.service
+    deb-systemd-invoke restart nut-server.service
+}
+
+case ${1} in
+    remove)
+        restart_nut_server
+        ;;
+    purge)
+        remove_config_files
+        restart_nut_server
+        ;;
+esac
+
+# Pass all incoming command line execution arguments into the main controller
+main "$@"
+
+# DEBHELPER macro placeholder required for downstream package additions
+#DEBHELPER#
+
+exit 0

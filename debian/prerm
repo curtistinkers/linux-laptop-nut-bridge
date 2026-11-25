@@ -1,0 +1,34 @@
+#!/bin/sh
+set -eu
+
+remove_battery_config() {
+    if [ -f /etc/nut/ups.conf ]; then
+        # This strips the [battery] block and its 3 indented trailing lines
+        sed -i '/\[battery\]/,+3d' /etc/nut/ups.conf
+    fi
+}
+
+disable_battery_bridge() {
+    deb-systemd-helper disable linux-laptop-nut-bridge.timer
+    deb-systemd-helper disable linux-laptop-nut-bridge.service
+
+    deb-systemd-helper disable nut-driver@battery.service
+}
+
+case ${1} in
+    remove)
+        disable_battery_bridge
+        ;;
+    purge)
+        disable_battery_bridge
+        remove_battery_config
+        ;;
+esac
+
+# Pass all incoming command line execution arguments into the main controller
+main "$@"
+
+# DEBHELPER macro placeholder required for downstream package additions
+#DEBHELPER#
+
+exit 0

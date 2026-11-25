@@ -1,33 +1,63 @@
 [Unit]
-Description=AC/Battery Power to NUT Synchronizer (Oneshot Run)
+Description=AC/Battery power to NUT synchronizer
 After=input.target
 Before=nut-driver.target
 
 [Service]
 Type=oneshot
 ExecStart=/usr/libexec/linux-laptop-nut-bridge/battery-nut-sync.sh
+StandardInput=null
+StandardOutput=journal
+StandardError=journal
 
-# Lock down the root filesystem, making it entirely read-only
+User=nut
+Group=nut
+
+# Grant explicit, minimal hardware access without root
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+# System call filtering (Allowing mandatory tools like dd, cat, od)
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources
+
+# Kernel and network lockdown
+RestrictAddressFamilies=none
+RestrictNamespaces=yes
+RestrictRealtime=yes
+ProtectClock=yes
+ProtectProc=invisible
+ProcSubset=pid
+PrivateNetwork=yes
+IPAddressDeny=any
+ProtectHostname=yes
+MemoryDenyWriteExecute=yes
+LockPersonality=yes
+RemoveIPC=yes
+
+# Filesystem isolation
 ProtectSystem=strict
-
-# Protect home directories and system logging configurations
 ProtectHome=yes
 ProtectControlGroups=yes
 ProtectKernelModules=yes
-
-# Create a completely isolated, private /tmp directory for this script
+ProtectKernelTunables=yes
+ProtectKernelLogs=yes
 PrivateTmp=yes
+PrivateUsers=yes
+RestrictSUIDSGID=yes
+UMask=0077
+MountFlags=private
 
-# Prevent the script from acquiring new privileges or elevation paths
+# Keep the host /dev but block everything except the input subsystem character devices
+PrivateDevices=yes
+DevicePolicy=strict
+DeviceAllow=/dev/null rw
+
+# Prevent privilege escalation
 NoNewPrivileges=yes
-
-# Deny access to networking tunnels and kernel clock tuning
-RestrictAddressFamilies=none
-ProtectClock=yes
 
 # Restrict /run directory access
 RuntimeDirectory=linux-laptop-nut-bridge
 RuntimeDirectoryPreserve=yes
-
-[Install]
-WantedBy=multi-user.target
+RuntimeDirectoryMode=700

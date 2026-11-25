@@ -1,0 +1,7 @@
+linux-laptop-nut-bridge (2.0.0) UNRELEASED; urgency=medium
+
+  * Convert packaging to debuild.
+  * Update postinst/prerm/postrm scripts to case statements and functions.
+    (Closes: #100000)
+
+ -- curtistinkers <curtistinkers.commit@gmail.com>  Tue, 24 Nov 2026 10:02:12 -0600
