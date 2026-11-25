@@ -1,5 +1,5 @@
 [Unit]
-Description=Trigger AC/Battery Power to NUT Synchronizer Periodically
+Description=Trigger AC/Battery power to NUT synchronizer
 
 [Timer]
 OnBootSec=1

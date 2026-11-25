@@ -5,7 +5,7 @@ BAT_DIR=$(find /sys/class/power_supply/ -maxdepth 1 -name "BAT*" -o -name "BATT*
 AC_DIR=$(find /sys/class/power_supply/ -maxdepth 1 -name "AC*" -o -name "ADP*" -o -name "ACAD*" | head -n 1)
 
 RUN_DIR="/run/linux-laptop-nut-bridge"
-STATUS_FILE="$RUN_DIR/internal_battery_sync.status"
+STATUS_FILE="$RUN_DIR/internal_battery_status"
 
 # 1. Instantly generate a placeholder so the NUT daemon never encounters a missing file
 touch "$STATUS_FILE"
@@ -91,7 +91,6 @@ ups.serial: %s\n" \
         "$MODEL" "$MFR" "$SERIAL" > "$STATUS_FILE.tmp"
 
     mv "$STATUS_FILE.tmp" "$STATUS_FILE"
-    chmod 644 "$STATUS_FILE"
 }
 
 update_nut_status

@@ -1,6 +1,9 @@
 # Linux Laptop NUT Bridge
 
-A lightweight, sandboxed integration framework that exposes a Linux laptop's internal battery telemetry to Network UPS Tools (NUT). It dynamically scans and adapts to diverse laptop hardware layouts, translating ACPI metrics into a `[battery]` pseudo-UPS NUT device.
+A lightweight, sandboxed integration framework that exposes a Linux laptop's
+internal battery telemetry to Network UPS Tools (NUT). It dynamically scans and
+adapts to diverse laptop hardware layouts, translating ACPI metrics into a
+`[battery]` pseudo-UPS NUT device.
 
 ## Directory Structure
 
@@ -23,9 +26,7 @@ A lightweight, sandboxed integration framework that exposes a Linux laptop's int
 
 ## System Dependencies
 
-Automatically pulled during installation:
-
-* `coreutils`, `grep`, `awk`, `systemd`
+* `systemd`
 * `nut-server`
 * `nut-client`
 
@@ -35,21 +36,24 @@ The `linux-laptop-nut-bridge.service` utilizes strict systemd security confineme
 
 * `ProtectSystem=strict` blocks total filesystem modification.
 * `NoNewPrivileges=yes` prevents process privilege elevation.
-* `RuntimeDirectory=linux-laptop-nut-bridge` confines all transient file operations strictly to an ephemeral, root-allocated memory space at `/run/linux-laptop-nut-bridge/`.
-* `RuntimeDirectoryPreserve=yes` ensures the tracked metrics remain in memory between the timer execution intervals.
+* `RuntimeDirectory=linux-laptop-nut-bridge` confines all transient file
+  operations strictly to an ephemeral, root-allocated memory space at
+  `/run/linux-laptop-nut-bridge/`.
+* `RuntimeDirectoryPreserve=yes` ensures the tracked metrics remain in memory
+  between the timer execution intervals.
 
 ## Build and Installation
 
 1. Compile the workspace structure cleanly on your host machine:
 
    ```bash
-   dpkg-deb --build ~/linux-laptop-nut-bridge
+   ./build.sh
    ```
 
 2. Deploy the generated configuration archive using `apt`:
 
    ```bash
-   sudo apt install ./linux-laptop-nut-bridge.deb
+   sudo apt install ./linux-laptop-nut-bridge_X.X.X_all.deb
    ```
 
 ## Verifying NUT Telemetry

@@ -1,7 +1,7 @@
 #!/bin/sh
-set -e
+set -eu
 
-if [ "$1" = "configure" ]; then
+update_nut_config_file() {
     # 1. Update nut.conf to standalone mode if not already set
     if [ -f /etc/nut/nut.conf ]; then
         sed -i 's/^MODE=.*/MODE=standalone/g' /etc/nut/nut.conf
@@ -13,25 +13,49 @@ if [ "$1" = "configure" ]; then
 
 [battery]
     driver = dummy-ups
-    port = /run/linux-laptop-nut-bridge/internal_battery_sync.status
+    port = /run/linux-laptop-nut-bridge/internal_battery_status
     desc = "Internal Laptop Battery Pseudo-UPS"
 EOF
     fi
+}
 
-    # 3. Force systemd to refresh its disk cache BEFORE touching any units
+enable_nut_bridge() {
+    if [ -d /run/systemd/system ]; then
+        # 3. Force systemd to refresh its disk cache BEFORE touching any units
     systemctl daemon-reload
 
     # 5. Run the oneshot service to initialize the /run directory and file
-    systemctl start linux-laptop-nut-bridge.service || true
+    deb-systemd-invoke start linux-laptop-nut-bridge.service >/dev/null || true
 
     # 5. Enable and start the timer
-    systemctl enable linux-laptop-nut-bridge.timer || true
-    systemctl start linux-laptop-nut-bridge.timer || true
+    deb-systemd-helper enable linux-laptop-nut-bridge.timer >/dev/null || true
+    deb-systemd-invoke start linux-laptop-nut-bridge.timer >/dev/null || true
 
     # 6. Update the driver list and start the server stack asynchronously
     systemctl daemon-reload
-    systemctl restart nut-driver-enumerator.service || true
-    systemctl enable nut-driver@battery.service || true
-    systemctl start nut-driver@battery.service || true
-    systemctl restart nut-server.service || true
+    deb-systemd-invoke restart nut-driver-enumerator.service >/dev/null || true
+    deb-systemd-invoke start nut-driver@battery.service >/dev/null || true
+    deb-systemd-helper enable nut-driver@battery.service >/dev/null || true
+    deb-systemd-invoke restart nut-server.service >/dev/null || true
 fi
+}
+
+main() {
+    case "${1}" in
+        configure)
+            update_nut_config_file
+            enable_nut_bridge
+            ;;
+        upgrade)
+            enable_nut_bridge
+            ;;
+    esac
+}
+
+# Pass all incoming command line execution arguments into the main controller
+main "$@"
+
+# DEBHELPER macro placeholder required for downstream package additions
+#DEBHELPER#
+
+exit 0

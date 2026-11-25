@@ -1,10 +1,13 @@
-Package: linux-laptop-nut-bridge
-Version: 1.x-dev
+Source: linux-laptop-nut-bridge
 Section: utils
 Priority: optional
-Architecture: all
 Maintainer: curtistinkers <curtistinkers.commit@gmail.com>
-Depends: coreutils, grep, awk, systemd, nut-server, nut-client
-Description: Virtual Network UPS Tools (NUT) bridge for Dell Latitude E7440.
+Build-Depends: debhelper-compat (=13)
+Standards-Version: 4.6.2
+
+Package: linux-laptop-nut-bridge
+Architecture: all
+Depends: ${misc:Depends}, systemd, nut-server, nut-client
+Description: Virtual Network UPS Tools (NUT) bridge for laptop batteries.
  Automatically translates internal ACPI battery capacity and line states
  into a dummy-ups device.

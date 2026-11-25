@@ -1,28 +1,34 @@
 #!/bin/sh
-set -e
+set -eu
 
-if [ "$1" = "remove" ] || [ "$1" = "purge" ]; then
-    # 1. Stop and disable the background timer and service definitions
-    systemctl disable --now linux-laptop-nut-bridge.timer || true
-    systemctl disable --now linux-laptop-nut-bridge.service || true
-
-    # 2. Stop the virtual NUT driver instance tracking your container
-    systemctl disable --now nut-driver@battery.service || true
-
-    # 3. Cleanly remove the [battery] block from ups.conf if present
+remove_battery_config() {
     if [ -f /etc/nut/ups.conf ]; then
         # This strips the [battery] block and its 3 indented trailing lines
         sed -i '/\[battery\]/,+3d' /etc/nut/ups.conf
     fi
+}
 
-    # 4. Clean out the systemd instance directory and its generated checksums
-    rm -rf /etc/systemd/system/nut-driver@battery.service.d
+disable_battery_bridge() {
+    deb-systemd-helper disable linux-laptop-nut-bridge.timer
+    deb-systemd-helper disable linux-laptop-nut-bridge.service
 
-    # 4. Clean out the run directory
-    rm -rf /run/linux-laptop-nut-bridge
+    deb-systemd-helper disable nut-driver@battery.service
+}
 
-    # 5. Refresh systemd and restart the core NUT server to clear the network state
-    systemctl daemon-reload
-    systemctl restart nut-driver-enumerator.service || true
-    systemctl restart nut-server.service || true
-fi
+case ${1} in
+    remove)
+        disable_battery_bridge
+        ;;
+    purge)
+        disable_battery_bridge
+        remove_battery_config
+        ;;
+esac
+
+# Pass all incoming command line execution arguments into the main controller
+main "$@"
+
+# DEBHELPER macro placeholder required for downstream package additions
+#DEBHELPER#
+
+exit 0
