@@ -14,7 +14,7 @@ update_nut_config_file() {
 [battery]
     driver = dummy-ups
     mode = dummy-loop
-    port = /run/linux-laptop-nut-bridge/internal_battery_status
+    port = /run/linux-laptop-nut-bridge/battery_status
     pollinterval = 5
 EOF
     fi
