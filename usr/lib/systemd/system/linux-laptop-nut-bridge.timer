@@ -3,7 +3,7 @@ Description=Trigger AC/Battery power to NUT synchronizer
 
 [Timer]
 OnBootSec=1
-OnUnitActiveSec=2
+OnUnitActiveSec=5
 AccuracySec=1ms
 
 [Install]
