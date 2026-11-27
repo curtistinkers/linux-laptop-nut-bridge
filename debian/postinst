@@ -13,8 +13,9 @@ update_nut_config_file() {
 
 [battery]
     driver = dummy-ups
+    mode = dummy-loop
     port = /run/linux-laptop-nut-bridge/internal_battery_status
-    desc = "Internal Laptop Battery Pseudo-UPS"
+    pollinterval = 5
 EOF
     fi
 }
