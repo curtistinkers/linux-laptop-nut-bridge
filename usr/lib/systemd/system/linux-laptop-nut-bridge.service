@@ -28,7 +28,6 @@ RestrictNamespaces=yes
 RestrictRealtime=yes
 ProtectClock=yes
 ProtectProc=invisible
-ProcSubset=pid
 PrivateNetwork=yes
 IPAddressDeny=any
 ProtectHostname=yes
