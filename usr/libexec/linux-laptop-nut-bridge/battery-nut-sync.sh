@@ -3,12 +3,15 @@ set -euo pipefail
 
 DEBUG=false
 
-# LOW_BATTERY_THRESHOLD=20              # Default: 20
-# DEVICE_TYPE='ups'                     # Default: 'ups'
-# DEVICE_DESCRIPTION='Internal battery' # Default: 'Internal battery'
-# DEVICE_CONTACT=''                     # Default: ''
-# DEVICE_LOCATION=''                    # Default: ''
-# DEVICE_PART=''                        # Default: ''
+# LOW_BATTERY_THRESHOLD=20                # Default: 20
+# DEVICE_TYPE='ups'                       # Default: 'ups'
+# DEVICE_DESCRIPTION='Internal battery'   # Default: 'Internal battery'
+# DEVICE_CONTACT=''                       # Default: ''
+# DEVICE_LOCATION=''                      # Default: ''
+# DEVICE_PART=''                          # Default: ''
+# BATTERY_DATE=''                         # Default: ''
+# BATTERY_DATE_MAINTENANCE=''             # Default: ''
+# BATTERY_MFR_DATE=''                     # Default: ''
 
 CONFIG_FILE="/etc/linux-laptop-nut-bridge/config.ini"
 
@@ -71,8 +74,6 @@ is_between_1_and_100() {
 # 2. Cache permanent hardware metadata variables right at startup
 MFR=$(cat "${BAT_DIR}/manufacturer" 2>/dev/null || echo "Generic")
 MODEL=$(cat "${BAT_DIR}/model_name" 2>/dev/null || echo "Internal Battery")
-
-echo "Initializing Laptop Battery to NUT Sync Handler"
 
 # get_device_model() {}
 
@@ -416,11 +417,16 @@ update_nut_status() {
         if [[ "${device_location}" != '' ]]; then printf 'device.location: %s\n' "${device_location}"; fi
         if [[ "${device_part}" != '' ]]; then printf 'device.part: %s\n' "${device_part}"; fi
         printf 'device.uptime: %u\n' "${device_uptime}"
+
         # Standard NUT UPS variables
+        printf 'ups.model: %s\n' "${device_model}"
+        printf 'ups.mfr: %s\n' "${device_mfr}"
+        if [[ "${device_serial}" != '' ]]; then printf 'ups.serial: %s\n' "${device_serial}"; fi
         printf 'ups.status: %s\n' "${ups_status}"
         printf 'ups.date: %s\n' "${ups_date}"
         printf 'ups.time: %s\n' "${ups_time}"
         printf 'ups.mode: %s\n' "${ups_mode}"
+
         # Standard NUT battery variables
         if [[ "${battery_charge}" != 'nan' ]]; then printf 'battery.charge: %u\n' "${battery_charge}"; fi
         printf 'battery.charge.low: %u\n' "${battery_charge_low}"
@@ -431,6 +437,7 @@ update_nut_status() {
         if [[ "${battery_capacity_nominal}" != "nan" ]]; then printf 'battery.capacity.nominal: %.3f\n' "${battery_capacity_nominal}"; fi
         if [[ "${battery_current}" != "nan" ]]; then printf 'battery.current: %.2f\n' "${battery_current}"; fi
         printf 'battery.type: %s\n' "${battery_type}"
+
         # Non-standard battery variables
         if [[ "${battery_capacity_full}" != "nan" ]]; then printf 'battery.capacity.full: %.3f\n' "${battery_capacity_full}"; fi
         if [[ "${battery_cycles}" != "nan" ]]; then printf 'battery.cycles: %u\n' "${battery_cycles}"; fi
@@ -444,5 +451,7 @@ update_nut_status() {
         echo "${OUTPUT}"
     fi
 }
+
+echo "Starting Laptop Battery to NUT Sync Handler"
 
 update_nut_status
