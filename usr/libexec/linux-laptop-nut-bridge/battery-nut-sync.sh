@@ -24,7 +24,7 @@ BAT_DIR=$(find /sys/class/power_supply/ -maxdepth 1 -name "BAT*" -o -name "BATT*
 AC_DIR=$(find /sys/class/power_supply/ -maxdepth 1 -name "AC*" -o -name "ADP*" -o -name "ACAD*" | head -n 1)
 
 RUN_DIR="/run/linux-laptop-nut-bridge"
-STATUS_FILE="${RUN_DIR}/internal_battery_status"
+STATUS_FILE="${RUN_DIR}/battery_status"
 
 if [[ "${DEBUG}" != "true" ]]; then
     touch "${STATUS_FILE}"
